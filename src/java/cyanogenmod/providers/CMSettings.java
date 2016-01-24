@@ -1440,14 +1440,14 @@ public final class CMSettings {
                 sBooleanValidator;
 
         /**
-         * Whether to allow one finger quick settings expansion on the side of the statusbar.
-         * 0 = 0ff, 1 = right, 2 = left
+         * Whether to allow one finger quick settings expansion on the right side of the statusbar.
+         * 0 = 0ff, 1 = on
          */
         public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "qs_quick_pulldown";
 
         /** @hide */
         public static final Validator STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 2);
+                sBooleanValidator;
 
         /**
          * Whether to show the brightness slider in quick settings panel.
