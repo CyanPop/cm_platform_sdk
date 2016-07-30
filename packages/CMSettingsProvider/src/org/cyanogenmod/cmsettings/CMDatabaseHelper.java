@@ -153,6 +153,7 @@ public class CMDatabaseHelper extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (LOCAL_LOGV) Log.d(TAG, "Upgrading from version: " + oldVersion + " to " + newVersion);
         int upgradeVersion = oldVersion;
 
         if (upgradeVersion < 2) {
@@ -185,18 +186,20 @@ public class CMDatabaseHelper extends SQLiteOpenHelper{
         }
 
         if (upgradeVersion < 4) {
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                stmt = db.compileStatement("INSERT INTO secure(name,value)"
-                        + " VALUES(?,?);");
-                loadSetting(stmt, CMSettings.Secure.CM_SETUP_WIZARD_COMPLETED,
-                        Settings.Global.getString(mContext.getContentResolver(),
-                                Settings.Global.DEVICE_PROVISIONED));
-                db.setTransactionSuccessful();
-            } finally {
-                if (stmt != null) stmt.close();
-                db.endTransaction();
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                            + " VALUES(?,?);");
+                    final String provisionedFlag = Settings.Global.getString(
+                            mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED);
+                    loadSetting(stmt, CMSettings.Secure.CM_SETUP_WIZARD_COMPLETED, provisionedFlag);
+                    db.setTransactionSuccessful();
+                } finally {
+                    if (stmt != null) stmt.close();
+                    db.endTransaction();
+                }
             }
             upgradeVersion = 4;
         }
@@ -343,6 +346,14 @@ public class CMDatabaseHelper extends SQLiteOpenHelper{
             loadStringSetting(stmt,
                     CMSettings.Secure.PROTECTED_COMPONENT_MANAGERS,
                     R.string.def_protected_component_managers);
+
+            loadStringSetting(stmt,
+                    CMSettings.Secure.ENABLED_EVENT_LIVE_LOCKS_KEY,
+                    R.string.def_enabled_event_lls_components);
+
+            final String provisionedFlag = Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED);
+            loadSetting(stmt, CMSettings.Secure.CM_SETUP_WIZARD_COMPLETED, provisionedFlag);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -366,8 +377,14 @@ public class CMDatabaseHelper extends SQLiteOpenHelper{
             loadBooleanSetting(stmt, CMSettings.System.SYSTEM_PROFILES_ENABLED,
                     R.bool.def_profiles_enabled);
 
+            loadIntegerSetting(stmt, CMSettings.System.ENABLE_FORWARD_LOOKUP,
+                    R.integer.def_forward_lookup);
+
             loadIntegerSetting(stmt, CMSettings.System.ENABLE_PEOPLE_LOOKUP,
                     R.integer.def_people_lookup);
+
+            loadIntegerSetting(stmt, CMSettings.System.ENABLE_REVERSE_LOOKUP,
+                    R.integer.def_reverse_lookup);
 
             loadBooleanSetting(stmt, CMSettings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE,
                     R.bool.def_notification_pulse_custom_enable);

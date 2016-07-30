@@ -56,8 +56,14 @@ public class CMSettingsProviderDefaultsTest extends AndroidTestCase {
                 CMSettings.System.NOTIFICATION_LIGHT_BRIGHTNESS_LEVEL,
                 "R.integer.def_notification_brightness_level"));
         SYSTEM_SETTINGS_DEFAULTS.add(new Setting(
+                CMSettings.System.ENABLE_FORWARD_LOOKUP,
+                "R.integer.def_forward_lookup"));
+        SYSTEM_SETTINGS_DEFAULTS.add(new Setting(
                 CMSettings.System.ENABLE_PEOPLE_LOOKUP,
                 "R.integer.def_people_lookup"));
+        SYSTEM_SETTINGS_DEFAULTS.add(new Setting(
+                CMSettings.System.ENABLE_REVERSE_LOOKUP,
+                "R.integer.def_reverse_lookup"));
         SYSTEM_SETTINGS_DEFAULTS.add(new Setting(
                 CMSettings.System.NOTIFICATION_LIGHT_MULTIPLE_LEDS_ENABLE,
                 "R.bool.def_notification_multiple_leds"));
@@ -80,9 +86,6 @@ public class CMSettingsProviderDefaultsTest extends AndroidTestCase {
 
     //SECURE
     static {
-        SECURE_SETTINGS_DEFAULTS.add(new Setting(
-                CMSettings.Secure.DEV_FORCE_SHOW_NAVBAR,
-                "R.integer.def_force_show_navbar"));
         SECURE_SETTINGS_DEFAULTS.add(new Setting(
                 CMSettings.Secure.ADVANCED_MODE,
                 "R.bool.def_advanced_mode"));
@@ -120,6 +123,9 @@ public class CMSettingsProviderDefaultsTest extends AndroidTestCase {
         GLOBAL_SETTINGS_DEFAULTS.add(new Setting(
                 CMSettings.Global.WEATHER_TEMPERATURE_UNIT,
                 "R.integer.def_temperature_unit"));
+        GLOBAL_SETTINGS_DEFAULTS.add(new Setting(
+                CMSettings.Global.DEV_FORCE_SHOW_NAVBAR,
+                "R.integer.def_force_show_navbar"));
     }
 
     @Override

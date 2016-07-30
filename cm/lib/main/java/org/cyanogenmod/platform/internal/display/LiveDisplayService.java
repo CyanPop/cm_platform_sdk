@@ -40,13 +40,11 @@ import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
-import com.android.server.SystemService;
 import com.android.server.pm.UserContentObserver;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -54,6 +52,7 @@ import com.android.server.twilight.TwilightState;
 
 import org.cyanogenmod.internal.util.QSConstants;
 import org.cyanogenmod.internal.util.QSUtils;
+import org.cyanogenmod.platform.internal.CMSystemService;
 import org.cyanogenmod.platform.internal.R;
 
 import java.io.FileDescriptor;
@@ -79,7 +78,7 @@ import cyanogenmod.providers.CMSettings;
  * and calibration. It interacts with CMHardwareService to relay
  * changes down to the lower layers.
  */
-public class LiveDisplayService extends SystemService {
+public class LiveDisplayService extends CMSystemService {
 
     private static final String TAG = "LiveDisplay";
 
@@ -147,14 +146,13 @@ public class LiveDisplayService extends SystemService {
     }
 
     @Override
+    public String getFeatureDeclaration() {
+        return CMContextConstants.Features.LIVEDISPLAY;
+    }
+
+    @Override
     public void onStart() {
-        if (mContext.getPackageManager().hasSystemFeature(
-                CMContextConstants.Features.LIVEDISPLAY)) {
-            publishBinderService(CMContextConstants.CM_LIVEDISPLAY_SERVICE, mBinder);
-        } else {
-            Log.wtf(TAG, "CM LiveDisplay service started by system server but feature xml not" +
-                    " declared. Not publishing binder service!");
-        }
+        publishBinderService(CMContextConstants.CM_LIVEDISPLAY_SERVICE, mBinder);
     }
 
     @Override
@@ -188,7 +186,8 @@ public class LiveDisplayService extends SystemService {
             mConfig = new LiveDisplayConfig(capabilities, defaultMode,
                     mCTC.getDefaultDayTemperature(), mCTC.getDefaultNightTemperature(),
                     mOMC.getDefaultAutoOutdoorMode(), mDHC.getDefaultAutoContrast(),
-                    mDHC.getDefaultCABC(), mDHC.getDefaultColorEnhancement());
+                    mDHC.getDefaultCABC(), mDHC.getDefaultColorEnhancement(),
+                    mCTC.getColorTemperatureRange(), mCTC.getColorBalanceRange());
 
             // listeners
             mDisplayManager = (DisplayManager) getContext().getSystemService(
@@ -468,6 +467,8 @@ public class LiveDisplayService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
             pw.println();
             pw.println("LiveDisplay Service State:");
             pw.println("  mState=" + mState.toString());

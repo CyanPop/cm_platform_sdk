@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Range;
 
 import cyanogenmod.app.CMContextConstants;
 
@@ -129,6 +130,11 @@ public final class CMHardwareManager {
      */
     public static final int FEATURE_UNIQUE_DEVICE_ID = 0x10000;
 
+    /**
+     * Color balance
+     */
+    public static final int FEATURE_COLOR_BALANCE = 0x20000;
+
     private static final List<Integer> BOOLEAN_FEATURES = Arrays.asList(
         FEATURE_ADAPTIVE_BACKLIGHT,
         FEATURE_COLOR_ENHANCEMENT,
@@ -157,7 +163,7 @@ public final class CMHardwareManager {
 
         if (context.getPackageManager().hasSystemFeature(
                 CMContextConstants.Features.HARDWARE_ABSTRACTION) && !checkService()) {
-            throw new RuntimeException("Unable to get CMHardwareService. The service either" +
+            Log.wtf(TAG, "Unable to get CMHardwareService. The service either" +
                     " crashed, was not started, or the interface has been called to early in" +
                     " SystemServer init");
         }
@@ -422,7 +428,7 @@ public final class CMHardwareManager {
      * Set the display color calibration to the given rgb triplet
      *
      * @param rgb RGB color calibration.  Each value must be between
-     * {@link getDisplayColorCalibrationMin()} and {@link getDisplayColorCalibrationMax()},
+     * {@link #getDisplayColorCalibrationMin()} and {@link #getDisplayColorCalibrationMax()},
      * inclusive.
      *
      * @return true on success, false otherwise.
@@ -609,7 +615,7 @@ public final class CMHardwareManager {
     }
 
     /**
-     * @param the control to query
+     * @param idx the control to query
      *
      * @return the current RGB gamma calibration for the given control
      */
@@ -643,7 +649,7 @@ public final class CMHardwareManager {
      *
      * @param idx the control to set
      * @param rgb RGB color calibration.  Each value must be between
-     * {@link getDisplayGammaCalibrationMin()} and {@link getDisplayGammaCalibrationMax()},
+     * {@link #getDisplayGammaCalibrationMin()} and {@link #getDisplayGammaCalibrationMax()},
      * inclusive.
      *
      * @return true on success, false otherwise.
@@ -797,6 +803,39 @@ public final class CMHardwareManager {
         try {
             if (checkService()) {
                 return sService.setDisplayMode(mode, makeDefault);
+            }
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    public Range<Integer> getColorBalanceRange() {
+        int min = 0;
+        int max = 0;
+        try {
+            if (checkService()) {
+                min = sService.getColorBalanceMin();
+                max = sService.getColorBalanceMax();
+            }
+        } catch (RemoteException e) {
+        }
+        return new Range<Integer>(min, max);
+    }
+
+    public int getColorBalance() {
+        try {
+            if (checkService()) {
+                return sService.getColorBalance();
+            }
+        } catch (RemoteException e) {
+        }
+        return 0;
+    }
+
+    public boolean setColorBalance(int value) {
+        try {
+            if (checkService()) {
+                return sService.setColorBalance(value);
             }
         } catch (RemoteException e) {
         }

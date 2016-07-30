@@ -1311,7 +1311,7 @@ public final class CMSettings {
 
         /** @hide */
         public static final Validator DISPLAY_TEMPERATURE_DAY_VALIDATOR =
-                new InclusiveIntegerRangeValidator(1000, 10000);
+                new InclusiveIntegerRangeValidator(0, 100000);
 
         /**
          * Color temperature of the display at night
@@ -1320,7 +1320,7 @@ public final class CMSettings {
 
         /** @hide */
         public static final Validator DISPLAY_TEMPERATURE_NIGHT_VALIDATOR =
-                new InclusiveIntegerRangeValidator(1000, 10000);
+                new InclusiveIntegerRangeValidator(0, 100000);
 
         /**
          * Display color temperature adjustment mode, one of DAY (default), NIGHT, or AUTO.
@@ -1484,6 +1484,16 @@ public final class CMSettings {
 
         /** @hide */
         public static final Validator LOCKSCREEN_PIN_SCRAMBLE_LAYOUT_VALIDATOR =
+                sBooleanValidator;
+
+        /**
+         * Whether keyguard will rotate to landscape mode
+         * 0 = false, 1 = true
+         */
+        public static final String LOCKSCREEN_ROTATION = "lockscreen_rotation";
+
+        /** @hide */
+        public static final Validator LOCKSCREEN_ROTATION_VALIDATOR =
                 sBooleanValidator;
 
         /**
@@ -1855,7 +1865,7 @@ public final class CMSettings {
          * me bro
          */
         public static final Validator __MAGICAL_TEST_PASSING_ENABLER_VALIDATOR =
-                sBooleanValidator;
+                sAlwaysTrueValidator;
 
         /**
          * @hide
@@ -2059,6 +2069,7 @@ public final class CMSettings {
             VALIDATORS.put(BLUETOOTH_ACCEPT_ALL_FILES, BLUETOOTH_ACCEPT_ALL_FILES_VALIDATOR);
             VALIDATORS.put(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT,
                     LOCKSCREEN_PIN_SCRAMBLE_LAYOUT_VALIDATOR);
+            VALIDATORS.put(LOCKSCREEN_ROTATION, LOCKSCREEN_ROTATION_VALIDATOR);
             VALIDATORS.put(SHOW_ALARM_ICON, SHOW_ALARM_ICON_VALIDATOR);
             VALIDATORS.put(STATUS_BAR_IME_SWITCHER, STATUS_BAR_IME_SWITCHER_VALIDATOR);
             VALIDATORS.put(STATUS_BAR_QUICK_QS_PULLDOWN,
@@ -2813,6 +2824,19 @@ public final class CMSettings {
          */
         public static final String CM_SETUP_WIZARD_COMPLETED = "cm_setup_wizard_completed";
 
+        /**
+         * Whether lock screen bluring is enabled on devices that support this feature
+         * @hide
+         */
+        public static final String LOCK_SCREEN_BLUR_ENABLED = "lock_screen_blur_enabled";
+
+        /**
+         * Whether to display weather information on the lock screen
+         * @hide
+         */
+        public static final String LOCK_SCREEN_WEATHER_ENABLED = "lock_screen_weather_enabled";
+
+
         // endregion
 
         /**
@@ -3361,6 +3385,13 @@ public final class CMSettings {
          */
         public static final String DEV_FORCE_SHOW_NAVBAR = "dev_force_show_navbar";
         // endregion
+
+        /**
+         * I can haz more bukkits
+         * @hide
+         */
+        public static final String __MAGICAL_TEST_PASSING_ENABLER =
+                "___magical_test_passing_enabler";
 
         /**
          * @hide

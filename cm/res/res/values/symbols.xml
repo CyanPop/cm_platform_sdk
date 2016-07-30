@@ -73,6 +73,9 @@
     <java-symbol type="integer" name="config_nightColorTemperature" />
     <java-symbol type="integer" name="config_outdoorAmbientLux" />
     <java-symbol type="integer" name="config_defaultLiveDisplayMode" />
+    <java-symbol type="integer" name="config_minColorTemperature" />
+    <java-symbol type="integer" name="config_maxColorTemperature" />
+
     <java-symbol type="bool" name="config_defaultAutoContrast" />
     <java-symbol type="bool" name="config_defaultAutoOutdoorMode" />
     <java-symbol type="bool" name="config_defaultColorEnhancement" />
@@ -118,4 +121,7 @@
     <java-symbol type="string" name="qs_themes_label" />
     <java-symbol type="string" name="qs_themes_content_description" />
     <java-symbol type="drawable" name="ic_qs_themes" />
+
+    <!-- CM system server -->
+    <java-symbol type="string" name="config_externalSystemServer" />
 </resources>

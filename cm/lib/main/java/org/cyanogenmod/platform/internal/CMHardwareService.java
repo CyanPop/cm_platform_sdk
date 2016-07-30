@@ -36,6 +36,7 @@ import java.util.Arrays;
 
 import org.cyanogenmod.hardware.AdaptiveBacklight;
 import org.cyanogenmod.hardware.AutoContrast;
+import org.cyanogenmod.hardware.ColorBalance;
 import org.cyanogenmod.hardware.ColorEnhancement;
 import org.cyanogenmod.hardware.DisplayColorCalibration;
 import org.cyanogenmod.hardware.DisplayGammaCalibration;
@@ -54,7 +55,7 @@ import org.cyanogenmod.hardware.UniqueDeviceId;
 import org.cyanogenmod.hardware.VibratorHW;
 
 /** @hide */
-public class CMHardwareService extends SystemService implements ThermalUpdateCallback {
+public class CMHardwareService extends CMSystemService implements ThermalUpdateCallback {
 
     private static final boolean DEBUG = true;
     private static final String TAG = CMHardwareService.class.getSimpleName();
@@ -96,6 +97,11 @@ public class CMHardwareService extends SystemService implements ThermalUpdateCal
 
         public boolean writePersistentBytes(String key, byte[] value);
         public byte[] readPersistentBytes(String key);
+
+        public int getColorBalanceMin();
+        public int getColorBalanceMax();
+        public int getColorBalance();
+        public boolean setColorBalance(int value);
     }
 
     private class LegacyCMHardware implements CMHardwareInterface {
@@ -137,6 +143,8 @@ public class CMHardwareService extends SystemService implements ThermalUpdateCal
                 mSupportedFeatures |= CMHardwareManager.FEATURE_THERMAL_MONITOR;
             if (UniqueDeviceId.isSupported())
                 mSupportedFeatures |= CMHardwareManager.FEATURE_UNIQUE_DEVICE_ID;
+            if (ColorBalance.isSupported())
+                mSupportedFeatures |= CMHardwareManager.FEATURE_COLOR_BALANCE;
         }
 
         public int getSupportedFeatures() {
@@ -334,6 +342,22 @@ public class CMHardwareService extends SystemService implements ThermalUpdateCal
         public byte[] readPersistentBytes(String key) {
             return PersistentStorage.get(key);
         }
+
+        public int getColorBalanceMin() {
+            return ColorBalance.getMinValue();
+        }
+
+        public int getColorBalanceMax() {
+            return ColorBalance.getMaxValue();
+        }
+
+        public int getColorBalance() {
+            return ColorBalance.getValue();
+        }
+
+        public boolean setColorBalance(int value) {
+            return ColorBalance.setValue(value);
+        }
     }
 
     private CMHardwareInterface getImpl(Context context) {
@@ -344,13 +368,12 @@ public class CMHardwareService extends SystemService implements ThermalUpdateCal
         super(context);
         mContext = context;
         mCmHwImpl = getImpl(context);
-        if (context.getPackageManager().hasSystemFeature(
-                CMContextConstants.Features.HARDWARE_ABSTRACTION)) {
-            publishBinderService(CMContextConstants.CM_HARDWARE_SERVICE, mService);
-        } else {
-            Log.wtf(TAG, "CM hardware service started by system server but feature xml not" +
-                    " declared. Not publishing binder service!");
-        }
+        publishBinderService(CMContextConstants.CM_HARDWARE_SERVICE, mService);
+    }
+
+    @Override
+    public String getFeatureDeclaration() {
+        return CMContextConstants.Features.HARDWARE_ABSTRACTION;
     }
 
     @Override
@@ -685,6 +708,46 @@ public class CMHardwareService extends SystemService implements ThermalUpdateCal
                     cyanogenmod.platform.Manifest.permission.HARDWARE_ABSTRACTION_ACCESS, null);
             if (isSupported(CMHardwareManager.FEATURE_THERMAL_MONITOR)) {
                 return mRemoteCallbackList.unregister(callback);
+            }
+            return false;
+        }
+
+        @Override
+        public int getColorBalanceMin() {
+            mContext.enforceCallingOrSelfPermission(
+                    cyanogenmod.platform.Manifest.permission.HARDWARE_ABSTRACTION_ACCESS, null);
+            if (isSupported(CMHardwareManager.FEATURE_COLOR_BALANCE)) {
+                return mCmHwImpl.getColorBalanceMin();
+            }
+            return 0;
+        }
+
+        @Override
+        public int getColorBalanceMax() {
+            mContext.enforceCallingOrSelfPermission(
+                    cyanogenmod.platform.Manifest.permission.HARDWARE_ABSTRACTION_ACCESS, null);
+            if (isSupported(CMHardwareManager.FEATURE_COLOR_BALANCE)) {
+                return mCmHwImpl.getColorBalanceMax();
+            }
+            return 0;
+        }
+
+        @Override
+        public int getColorBalance() {
+            mContext.enforceCallingOrSelfPermission(
+                    cyanogenmod.platform.Manifest.permission.HARDWARE_ABSTRACTION_ACCESS, null);
+            if (isSupported(CMHardwareManager.FEATURE_COLOR_BALANCE)) {
+                return mCmHwImpl.getColorBalance();
+            }
+            return 0;
+        }
+
+        @Override
+        public boolean setColorBalance(int value) {
+            mContext.enforceCallingOrSelfPermission(
+                    cyanogenmod.platform.Manifest.permission.HARDWARE_ABSTRACTION_ACCESS, null);
+            if (isSupported(CMHardwareManager.FEATURE_COLOR_BALANCE)) {
+                return mCmHwImpl.setColorBalance(value);
             }
             return false;
         }

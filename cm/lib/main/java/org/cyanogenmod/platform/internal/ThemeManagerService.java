@@ -92,9 +92,12 @@ import static cyanogenmod.platform.Manifest.permission.ACCESS_THEME_MANAGER;
 import static org.cyanogenmod.internal.util.ThemeUtils.SYSTEM_THEME_PATH;
 import static org.cyanogenmod.internal.util.ThemeUtils.THEME_BOOTANIMATION_PATH;
 
-public class ThemeManagerService extends SystemService {
+public class ThemeManagerService extends CMSystemService {
 
     private static final String TAG = ThemeManagerService.class.getName();
+
+    //Constant to set Component_id in case of mismatch with mixnmatch_homescreen
+    private static final int DEFAULT_COMPONENT_ID = 0;
 
     private static final boolean DEBUG = false;
 
@@ -242,13 +245,13 @@ public class ThemeManagerService extends SystemService {
     }
 
     @Override
+    public String getFeatureDeclaration() {
+        return CMContextConstants.Features.THEMES;
+    }
+
+    @Override
     public void onStart() {
-        if (mContext.getPackageManager().hasSystemFeature(CMContextConstants.Features.THEMES)) {
-            publishBinderService(CMContextConstants.CM_THEME_SERVICE, mService);
-        } else {
-            Log.wtf(TAG, "Theme service started by system server but feature xml not" +
-                    " declared. Not publishing binder service!");
-        }
+        publishBinderService(CMContextConstants.CM_THEME_SERVICE, mService);
         // listen for wallpaper changes
         IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
         mContext.registerReceiver(mWallpaperChangeReceiver, filter);
@@ -485,8 +488,7 @@ public class ThemeManagerService extends SystemService {
 
     private void doApplyDefaultTheme() {
         final ContentResolver resolver = mContext.getContentResolver();
-        final String defaultThemePkg = CMSettings.Secure.getString(resolver,
-                CMSettings.Secure.DEFAULT_THEME_PACKAGE);
+        final String defaultThemePkg = ThemeUtils.getDefaultThemePackageName(mContext);
         if (!TextUtils.isEmpty(defaultThemePkg)) {
             String defaultThemeComponents = CMSettings.Secure.getString(resolver,
                     CMSettings.Secure.DEFAULT_THEME_COMPONENTS);
@@ -529,6 +531,8 @@ public class ThemeManagerService extends SystemService {
             // Add component ID for multiwallpaper
             if (ThemesColumns.MODIFIES_LAUNCHER.equals(component)) {
                 values.put(MixnMatchColumns.COL_COMPONENT_ID, request.getWallpaperId());
+            } else {
+                values.put(MixnMatchColumns.COL_COMPONENT_ID, DEFAULT_COMPONENT_ID);
             }
 
             mContext.getContentResolver().update(MixnMatchColumns.CONTENT_URI, values, where,
@@ -632,7 +636,7 @@ public class ThemeManagerService extends SystemService {
     private boolean updateAudible(String dirPath, String assetPath, int type, String pkgName) {
         //Clear the dir
         ThemeUtils.clearAudibles(mContext, dirPath);
-        if (pkgName.equals(SYSTEM_DEFAULT)) {
+        if (TextUtils.isEmpty(pkgName) || pkgName.equals(SYSTEM_DEFAULT)) {
             if (!ThemeUtils.setDefaultAudible(mContext, type)) {
                 Log.e(TAG, "There was an error installing the default audio file");
                 return false;
